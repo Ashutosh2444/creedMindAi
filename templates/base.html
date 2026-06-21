@@ -1,0 +1,42 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Copilot</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+               <nav>
+    <div class="logo">
+          AI Career Copilot
+    </div>
+
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/history">History</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+            </nav>
+        </div>  
+    </header>
+    <main  class="container">
+
+        {% block content %}
+        {% endblock %} 
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 AI Career Copilot.</p>
+        </div>
+    </footer>
+</body>
+</html>
+

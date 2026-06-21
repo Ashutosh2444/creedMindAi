@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2> Welcome to Your Dashboard,{{user}}</h2>
+
+<div class ="card"> 
+   <h3> Resume Analyzer</h3>
+   <form method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".pdf,.doc,.docx">
+    <textarea name="text" placeholder="Paste your resume text here"></textarea>
+    <input name="role" placeholder="what do you want to become? (e.g frontend developer)" required>
+    <button type="submit">Analyze Resume</button>
+    </form>
+
+</div>
+
+
+{% if result %}
+    <div class="results-grid">>
+        {% if result.error %}
+        <p style="color:#ff00c8;">{{result.error}}</p>
+        {% endif %}
+
+        <div class="result-card">
+    <h3> Skills</h3>
+    <ul>
+        {% for skill in result.skills %}
+        <li>{{ skill }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+        <div class="result-card">
+    <h3>⚠ Missing Skills</h3>
+    <ul>
+        {% for skill in result.missing_skills %}
+        <li>{{ skill }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+        
+        <div class="result-card">
+    <h3>🗺 Roadmap</h3>
+    <ul>
+        {% for skill in result.roadmap %}
+        <li>{{ skill }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+        
+        <div class="result-card">
+    <h3>🎯 Interview Questions</h3>
+    <ul>
+        {% for skill in result.interview_questions %}
+        <li>{{ skill }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+    </div>
+    {% endif %}
+
+
+{% endblock %}
