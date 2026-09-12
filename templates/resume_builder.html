@@ -1,0 +1,1014 @@
+{% extends "base.html" %}
+
+{% block title %}
+ATS Resume Builder | AI Career Copilot
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-container">
+
+    <!-- ==================================================
+         HERO
+    =================================================== -->
+
+    <section class="page-hero">
+
+        <div>
+
+            <span class="eyebrow">
+                AI Resume Creation
+            </span>
+
+            <h1>
+                ATS Resume Builder
+            </h1>
+
+            <p>
+                Enter your professional information and let AI
+                turn it into a clean, ATS-friendly Resume structure
+                for your target role.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         BUILDER FORM
+    =================================================== -->
+
+    <section class="panel">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Build Your Resume
+                </h2>
+
+                <p>
+                    Fill in your real information only.
+                    The AI will improve presentation without
+                    inventing fake experience or qualifications.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            class="analysis-form"
+        >
+
+            <!-- ==========================================
+                 PERSONAL INFORMATION
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        01
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Personal Information
+                        </h3>
+
+                        <p>
+                            Basic contact and professional details.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="name">
+                            Full Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Example: Ashutosh Kumar"
+                            value="{{ profile.get('name', '') if profile else '' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="target_role">
+                            Target Job Role *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="target_role"
+                            name="target_role"
+                            placeholder="Example: AI/ML Engineer"
+                            value="{{ profile.get('target_role', '') if profile else '' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email *
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            value="{{ profile.get('email', '') if profile else '' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone
+                        </label>
+
+                        <input
+                            type="text"
+                            id="phone"
+                            name="phone"
+                            placeholder="+91 XXXXX XXXXX"
+                            value="{{ profile.get('phone', '') if profile else '' }}"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="linkedin">
+                        LinkedIn / Portfolio
+                    </label>
+
+                    <input
+                        type="text"
+                        id="linkedin"
+                        name="linkedin"
+                        placeholder="LinkedIn profile or portfolio link"
+                        value="{{ profile.get('linkedin', '') if profile else '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 SUMMARY
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        02
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Professional Summary
+                        </h3>
+
+                        <p>
+                            Write your current profile in simple words.
+                            AI will improve it.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="summary">
+                        About You / Career Summary
+                    </label>
+
+                    <textarea
+                        id="summary"
+                        name="summary"
+                        rows="6"
+                        placeholder="Example: Computer Science student focused on AI/ML with hands-on experience in Python, Generative AI and intelligent applications..."
+                    >{{ profile.get('summary', '') if profile else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 SKILLS
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        03
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Skills
+                        </h3>
+
+                        <p>
+                            Add technical and relevant professional skills.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="skills">
+                        Skills
+                    </label>
+
+                    <textarea
+                        id="skills"
+                        name="skills"
+                        rows="5"
+                        placeholder="Example: Python, Machine Learning, NLP, Generative AI, Flask, SQLAlchemy, Git, HTML, CSS"
+                    >{{ profile.get('skills', '') if profile else '' }}</textarea>
+
+                    <small>
+                        You can separate skills using commas or new lines.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 EXPERIENCE
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        04
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Experience / Internship
+                        </h3>
+
+                        <p>
+                            Add only real internships, work experience
+                            or practical responsibilities.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="experience">
+                        Experience Details
+                    </label>
+
+                    <textarea
+                        id="experience"
+                        name="experience"
+                        rows="8"
+                        placeholder="Example:
+
+Python Intern - Company Name
+Worked on Python-based applications.
+Built automation scripts.
+Improved understanding of backend development."
+                    >{{ profile.get('experience', '') if profile else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 PROJECTS
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        05
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Projects
+                        </h3>
+
+                        <p>
+                            Add project name, purpose, technology
+                            and your contribution.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="projects">
+                        Project Details
+                    </label>
+
+                    <textarea
+                        id="projects"
+                        name="projects"
+                        rows="10"
+                        placeholder="Example:
+
+AI Resume Analyzer
+Built an AI-powered Resume analysis platform using Python and Flask.
+Implemented ATS scoring, JD matching, missing skill detection and AI recommendations.
+Integrated Gemini API for intelligent analysis."
+                    >{{ profile.get('projects', '') if profile else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 EDUCATION
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        06
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Education
+                        </h3>
+
+                        <p>
+                            Add degree, institute, specialization and year.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="education">
+                        Education Details
+                    </label>
+
+                    <textarea
+                        id="education"
+                        name="education"
+                        rows="6"
+                        placeholder="Example:
+
+B.Tech in Computer Science Engineering (AI & ML)
+University / College Name
+2023 - 2027"
+                    >{{ profile.get('education', '') if profile else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 CERTIFICATIONS
+            =========================================== -->
+
+            <div class="builder-section">
+
+                <div class="builder-section-title">
+
+                    <span class="builder-step">
+                        07
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Certifications
+                        </h3>
+
+                        <p>
+                            Add relevant courses, certifications
+                            and internship certificates.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="certifications">
+                        Certifications
+                    </label>
+
+                    <textarea
+                        id="certifications"
+                        name="certifications"
+                        rows="5"
+                        placeholder="Example:
+Python Programming Internship - InternPe
+Python Internship - Excellence Technology"
+                    >{{ profile.get('certifications', '') if profile else '' }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn large-btn"
+            >
+                Build ATS Resume
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==================================================
+         AI GENERATED RESUME
+    =================================================== -->
+
+    {% if result %}
+
+
+        {% if result.error %}
+
+        <section class="alert-card error-card">
+
+            <h3>
+                Resume Generation Failed
+            </h3>
+
+            <p>
+                {{ result.error }}
+            </p>
+
+        </section>
+
+
+        {% else %}
+
+        <section class="result-actions">
+
+            <div>
+
+                <span class="eyebrow">
+                    AI Generated Resume
+                </span>
+
+                <h2>
+                    ATS Resume Preview
+                </h2>
+
+                <p>
+                    Review the generated content before
+                    downloading your Resume.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('resume_builder_pdf') }}"
+                class="primary-btn"
+            >
+                Download Resume PDF
+            </a>
+
+        </section>
+
+
+        <!-- ==================================================
+             PROFESSIONAL RESUME PREVIEW
+        =================================================== -->
+
+        <section class="resume-preview">
+
+            <!-- HEADER -->
+
+            <div class="resume-preview-header">
+
+                <h1>
+                    {{ profile.get("name", "") }}
+                </h1>
+
+
+                {% if result.headline %}
+
+                <h2>
+                    {{ result.headline }}
+                </h2>
+
+                {% elif profile.get("target_role") %}
+
+                <h2>
+                    {{ profile.get("target_role") }}
+                </h2>
+
+                {% endif %}
+
+
+                <div class="resume-contact-line">
+
+                    {% if profile.get("email") %}
+
+                    <span>
+                        {{ profile.get("email") }}
+                    </span>
+
+                    {% endif %}
+
+
+                    {% if profile.get("phone") %}
+
+                    <span>
+                        {{ profile.get("phone") }}
+                    </span>
+
+                    {% endif %}
+
+
+                    {% if profile.get("linkedin") %}
+
+                    <span>
+                        {{ profile.get("linkedin") }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 PROFESSIONAL SUMMARY
+            =========================================== -->
+
+            {% if result.professional_summary %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Professional Summary
+                </h3>
+
+                <p>
+                    {{ result.professional_summary }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 SKILLS
+            =========================================== -->
+
+            {% if result.skills %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Skills
+                </h3>
+
+
+                <div class="resume-skill-list">
+
+                    {% for skill in result.skills %}
+
+                    <span>
+                        {{ skill }}
+                    </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 EXPERIENCE
+            =========================================== -->
+
+            {% if result.experience %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Experience
+                </h3>
+
+
+                {% for item in result.experience %}
+
+                <div class="resume-entry">
+
+                    <div class="resume-entry-header">
+
+                        <strong>
+                            {{ item.title }}
+                        </strong>
+
+
+                        {% if item.organization %}
+
+                        <span>
+                            {{ item.organization }}
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if item.details %}
+
+                        {% if item.details is string %}
+
+                        <p>
+                            {{ item.details }}
+                        </p>
+
+                        {% else %}
+
+                        <ul>
+
+                            {% for detail in item.details %}
+
+                            <li>
+                                {{ detail }}
+                            </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                        {% endif %}
+
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 PROJECTS
+            =========================================== -->
+
+            {% if result.projects %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Projects
+                </h3>
+
+
+                {% for project in result.projects %}
+
+                <div class="resume-entry">
+
+                    <div class="resume-entry-header">
+
+                        <strong>
+                            {{ project.name }}
+                        </strong>
+
+                    </div>
+
+
+                    {% if project.details %}
+
+                        {% if project.details is string %}
+
+                        <p>
+                            {{ project.details }}
+                        </p>
+
+                        {% else %}
+
+                        <ul>
+
+                            {% for detail in project.details %}
+
+                            <li>
+                                {{ detail }}
+                            </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                        {% endif %}
+
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 EDUCATION
+            =========================================== -->
+
+            {% if result.education %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Education
+                </h3>
+
+
+                {% if result.education is string %}
+
+                <p>
+                    {{ result.education }}
+                </p>
+
+                {% else %}
+
+                <ul>
+
+                    {% for item in result.education %}
+
+                    <li>
+                        {{ item }}
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 CERTIFICATIONS
+            =========================================== -->
+
+            {% if result.certifications %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Certifications
+                </h3>
+
+
+                {% if result.certifications is string %}
+
+                <p>
+                    {{ result.certifications }}
+                </p>
+
+                {% else %}
+
+                <ul>
+
+                    {% for item in result.certifications %}
+
+                    <li>
+                        {{ item }}
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 ATS KEYWORDS
+            =========================================== -->
+
+            {% if result.ats_keywords %}
+
+            <div class="resume-preview-section">
+
+                <h3>
+                    Relevant ATS Keywords
+                </h3>
+
+
+                <div class="resume-skill-list">
+
+                    {% for keyword in result.ats_keywords %}
+
+                    <span>
+                        {{ keyword }}
+                    </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==================================================
+             BUILDER TIPS
+        =================================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Final Check
+                    </span>
+
+                    <h2>
+                        Before Applying
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="recruiter-help-grid">
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        01
+                    </span>
+
+                    <h3>
+                        Verify Facts
+                    </h3>
+
+                    <p>
+                        Make sure all generated details match
+                        your actual education, skills and experience.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        02
+                    </span>
+
+                    <h3>
+                        Match the JD
+                    </h3>
+
+                    <p>
+                        Adjust skills and keywords for each
+                        job description where appropriate.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        03
+                    </span>
+
+                    <h3>
+                        Use Evidence
+                    </h3>
+
+                    <p>
+                        Add measurable impact and real project
+                        outcomes wherever possible.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        04
+                    </span>
+
+                    <h3>
+                        Keep It ATS Friendly
+                    </h3>
+
+                    <p>
+                        Avoid unnecessary graphics, tables
+                        and complex formatting in the final Resume.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

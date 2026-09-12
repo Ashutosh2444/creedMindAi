@@ -1,20 +1,506 @@
 {% extends "base.html" %}
 
-{% block content %} 
-<div class ="auth-container">
-    <div class="auth-card">
-        <h2>Create Account </h2>
-        <p class = "sub-text">
-            Start your journey with AI Career Copilot by creating an account. Sign up now to access personalized resume building, career guidance, and more. Join our community of professionals and take the first step towards your dream career!
+{% block title %}
+Create Account | CareerMind AI
+{% endblock %}
 
-        </p> 
-        <form method="post">
-            <input type="email" name="email" placeholder="email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <p class ="sub-text"> use at least 8 characters</p>
-            <button type="submit">Sign Up</button>
-        </form>   
-        <p class="switch-auth">Already have an account? <a href="/login">Login here</a></p>
+
+{% block content %}
+
+<div class="auth-page">
+
+    <div class="auth-container">
+
+        <!-- ==================================================
+             LEFT SIDE
+        =================================================== -->
+
+        <section class="auth-info">
+
+            <span class="eyebrow">
+                Get Started
+            </span>
+
+            <h1>
+                Build a Smarter Career with AI
+            </h1>
+
+            <p>
+                Create your account to access AI-powered
+                Resume analysis, interview preparation,
+                ATS Resume building and recruitment tools.
+            </p>
+
+
+            <div class="auth-feature-list">
+
+                <div class="auth-feature">
+
+                    <span class="auth-feature-number">
+                        01
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Advanced Resume Analysis
+                        </h3>
+
+                        <p>
+                            Get ATS score, section-wise analysis,
+                            missing skills and Resume improvements.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="auth-feature">
+
+                    <span class="auth-feature-number">
+                        02
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Resume vs Job Description
+                        </h3>
+
+                        <p>
+                            Compare your Resume with a target
+                            Job Description and identify skill gaps.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="auth-feature">
+
+                    <span class="auth-feature-number">
+                        03
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            AI Career Preparation
+                        </h3>
+
+                        <p>
+                            Practice mock interviews, build
+                            ATS-friendly Resumes and track reports.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             SIGNUP CARD
+        =================================================== -->
+
+        <section class="auth-card">
+
+            <div class="auth-card-header">
+
+                <span class="brand-icon large">
+                    AI
+                </span>
+
+                <h2>
+                    Create Account
+                </h2>
+
+                <p>
+                    Create your AI Career Copilot account.
+                </p>
+
+            </div>
+
+
+            <form
+                method="POST"
+                class="auth-form"
+                onsubmit="return validateSignupForm();"
+            >
+
+                <!-- NAME -->
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+
+                    <div class="password-field">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 8 characters"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                            oninput="checkPasswordStrength();"
+                        >
+
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword('password', this)"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+
+                    <div class="password-strength">
+
+                        <div
+                            id="passwordStrengthBar"
+                            class="password-strength-bar"
+                        ></div>
+
+                    </div>
+
+
+                    <small id="passwordStrengthText">
+                        Use at least 8 characters.
+                    </small>
+
+                </div>
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="confirm_password">
+                        Confirm Password
+                    </label>
+
+
+                    <div class="password-field">
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Enter password again"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        >
+
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword('confirm_password', this)"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+
+                    <small
+                        id="passwordMatchMessage"
+                        class="form-message"
+                    ></small>
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    class="primary-btn large-btn auth-submit"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+
+            <div class="auth-footer">
+
+                <p>
+                    Already have an account?
+
+                    <a href="{{ url_for('login') }}">
+                        Login
+                    </a>
+                </p>
+
+            </div>
+
+        </section>
+
     </div>
+
 </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+    // =====================================================
+    // SHOW / HIDE PASSWORD
+    // =====================================================
+
+    function togglePassword(inputId, button) {
+
+        const input =
+            document.getElementById(inputId);
+
+        if (input.type === "password") {
+
+            input.type = "text";
+
+            button.textContent = "Hide";
+
+            button.setAttribute(
+                "aria-label",
+                "Hide password"
+            );
+
+        } else {
+
+            input.type = "password";
+
+            button.textContent = "Show";
+
+            button.setAttribute(
+                "aria-label",
+                "Show password"
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // PASSWORD STRENGTH
+    // =====================================================
+
+    function checkPasswordStrength() {
+
+        const password =
+            document.getElementById("password").value;
+
+        const bar =
+            document.getElementById(
+                "passwordStrengthBar"
+            );
+
+        const text =
+            document.getElementById(
+                "passwordStrengthText"
+            );
+
+
+        let strength = 0;
+
+
+        if (password.length >= 8) {
+            strength++;
+        }
+
+
+        if (/[A-Z]/.test(password)) {
+            strength++;
+        }
+
+
+        if (/[0-9]/.test(password)) {
+            strength++;
+        }
+
+
+        if (/[^A-Za-z0-9]/.test(password)) {
+            strength++;
+        }
+
+
+        bar.className =
+            "password-strength-bar";
+
+
+        if (password.length === 0) {
+
+            bar.style.width = "0%";
+
+            text.textContent =
+                "Use at least 8 characters.";
+
+            return;
+
+        }
+
+
+        if (strength <= 1) {
+
+            bar.style.width = "25%";
+
+            bar.classList.add("weak");
+
+            text.textContent =
+                "Password strength: Weak";
+
+        } else if (strength === 2) {
+
+            bar.style.width = "50%";
+
+            bar.classList.add("medium");
+
+            text.textContent =
+                "Password strength: Medium";
+
+        } else if (strength === 3) {
+
+            bar.style.width = "75%";
+
+            bar.classList.add("good");
+
+            text.textContent =
+                "Password strength: Good";
+
+        } else {
+
+            bar.style.width = "100%";
+
+            bar.classList.add("strong");
+
+            text.textContent =
+                "Password strength: Strong";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SIGNUP VALIDATION
+    // =====================================================
+
+    function validateSignupForm() {
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+
+        const confirmPassword =
+            document.getElementById(
+                "confirm_password"
+            ).value;
+
+
+        const message =
+            document.getElementById(
+                "passwordMatchMessage"
+            );
+
+
+        if (password.length < 8) {
+
+            message.textContent =
+                "Password must contain at least 8 characters.";
+
+            message.className =
+                "form-message error-text";
+
+            return false;
+
+        }
+
+
+        if (password !== confirmPassword) {
+
+            message.textContent =
+                "Passwords do not match.";
+
+            message.className =
+                "form-message error-text";
+
+            return false;
+
+        }
+
+
+        message.textContent =
+            "Passwords match.";
+
+        message.className =
+            "form-message success-text";
+
+
+        return true;
+
+    }
+
+</script>
+
 {% endblock %}

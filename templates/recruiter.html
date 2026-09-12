@@ -1,0 +1,703 @@
+{% extends "base.html" %}
+
+{% block title %}
+Recruiter Dashboard | AI Career Copilot
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-container">
+
+    <!-- ==================================================
+         HERO
+    =================================================== -->
+
+    <section class="page-hero">
+
+        <div>
+
+            <span class="eyebrow">
+                AI Recruitment Intelligence
+            </span>
+
+            <h1>
+                Recruiter Dashboard
+            </h1>
+
+            <p>
+                Upload multiple candidate Resumes,
+                compare them against the same role
+                and Job Description, and get AI-powered
+                candidate ranking.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         UPLOAD FORM
+    =================================================== -->
+
+    <section class="panel">
+
+        <div class="section-heading">
+
+            <div>
+
+                <h2>
+                    Rank Multiple Candidates
+                </h2>
+
+                <p>
+                    Upload 2 to 10 genuine PDF/DOCX Resumes.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="analysis-form"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="role">
+                        Target Job Role *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="role"
+                        name="role"
+                        placeholder="Example: AI/ML Engineer"
+                        required
+                    >
+
+                    <small>
+                        All candidates will be evaluated
+                        for this same role.
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="resumes">
+                        Candidate Resumes *
+                    </label>
+
+                    <input
+                        type="file"
+                        id="resumes"
+                        name="resumes"
+                        accept=".pdf,.docx"
+                        multiple
+                        required
+                    >
+
+                    <small>
+                        Minimum 2 and maximum 10 Resume/CV files.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="job_description">
+                    Job Description
+                    <span class="optional">
+                        (Recommended)
+                    </span>
+                </label>
+
+                <textarea
+                    id="job_description"
+                    name="job_description"
+                    rows="8"
+                    placeholder="Paste the hiring Job Description here..."
+                ></textarea>
+
+                <small>
+                    Providing the JD improves candidate ranking accuracy.
+                </small>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn large-btn"
+            >
+                Analyze & Rank Candidates
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==================================================
+         REJECTED DOCUMENTS
+    =================================================== -->
+
+    {% if rejected %}
+
+    <section class="panel rejected-panel">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="eyebrow">
+                    Validation Results
+                </span>
+
+                <h2>
+                    Rejected Documents
+                </h2>
+
+                <p>
+                    These files were not accepted as valid Resume/CV documents.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="rejected-list">
+
+            {% for item in rejected %}
+
+            <div class="rejected-item">
+
+                <div>
+
+                    <strong>
+                        {{ item.filename }}
+                    </strong>
+
+                    <p>
+                        {{ item.reason }}
+                    </p>
+
+                </div>
+
+
+                <span class="status-badge danger">
+                    Rejected
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- ==================================================
+         RANKING RESULT
+    =================================================== -->
+
+    {% if result %}
+
+
+        {% if result.error %}
+
+        <section class="alert-card error-card">
+
+            <h3>
+                Candidate Ranking Failed
+            </h3>
+
+            <p>
+                {{ result.error }}
+            </p>
+
+        </section>
+
+
+        {% else %}
+
+
+        <section class="result-actions">
+
+            <div>
+
+                <span class="eyebrow">
+                    Recruitment Result
+                </span>
+
+                <h2>
+                    Candidate Ranking
+                </h2>
+
+                <p>
+                    AI-ranked candidates based on role relevance,
+                    ATS quality and Job Description alignment.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        {% if result.ranking %}
+
+        <div class="ranking-list">
+
+            {% for candidate in result.ranking %}
+
+            <article
+                class="candidate-card {% if candidate.rank == 1 %}top-candidate{% endif %}"
+            >
+
+                <!-- HEADER -->
+
+                <div class="candidate-header">
+
+                    <div class="rank-block">
+
+                        <span class="rank-label">
+                            Rank
+                        </span>
+
+                        <strong>
+                            #{{ candidate.rank }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="candidate-main">
+
+                        <div class="candidate-title-row">
+
+                            <div>
+
+                                <span class="candidate-id">
+                                    {{ candidate.candidate_id }}
+                                </span>
+
+                                <h2>
+                                    {{ candidate.filename }}
+                                </h2>
+
+                            </div>
+
+
+                            <span class="recommendation-badge
+                                {% if candidate.recommendation == 'Strong Yes' %}
+                                    success
+                                {% elif candidate.recommendation == 'Yes' %}
+                                    success
+                                {% elif candidate.recommendation == 'Maybe' %}
+                                    warning
+                                {% else %}
+                                    danger
+                                {% endif %}
+                            ">
+                                {{ candidate.recommendation }}
+                            </span>
+
+                        </div>
+
+
+                        {% if candidate.reason %}
+
+                        <p class="candidate-reason">
+                            {{ candidate.reason }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- SCORES -->
+
+                <div class="candidate-score-grid">
+
+                    <div class="candidate-score-item">
+
+                        <span>
+                            Final Score
+                        </span>
+
+                        <strong>
+                            {{ candidate.final_score }}%
+                        </strong>
+
+                        <div class="progress-track small">
+
+                            <div
+                                class="progress-fill"
+                                style="width: {{ candidate.final_score }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="candidate-score-item">
+
+                        <span>
+                            ATS Score
+                        </span>
+
+                        <strong>
+                            {{ candidate.ats_score }}%
+                        </strong>
+
+                        <div class="progress-track small">
+
+                            <div
+                                class="progress-fill"
+                                style="width: {{ candidate.ats_score }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="candidate-score-item">
+
+                        <span>
+                            JD Match
+                        </span>
+
+                        <strong>
+                            {{ candidate.jd_match_score }}%
+                        </strong>
+
+                        <div class="progress-track small">
+
+                            <div
+                                class="progress-fill"
+                                style="width: {{ candidate.jd_match_score }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DETAILS -->
+
+                <div class="candidate-detail-grid">
+
+                    <!-- TOP SKILLS -->
+
+                    <div class="candidate-detail-box">
+
+                        <h3>
+                            Top Skills
+                        </h3>
+
+
+                        <div class="tag-container">
+
+                            {% if candidate.top_skills %}
+
+                                {% for skill in candidate.top_skills %}
+
+                                <span class="tag success-tag">
+                                    {{ skill }}
+                                </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="empty-text">
+                                    No top skills returned.
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MISSING SKILLS -->
+
+                    <div class="candidate-detail-box">
+
+                        <h3>
+                            Missing Skills
+                        </h3>
+
+
+                        <div class="tag-container">
+
+                            {% if candidate.missing_skills %}
+
+                                {% for skill in candidate.missing_skills %}
+
+                                <span class="tag warning-tag">
+                                    {{ skill }}
+                                </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="empty-text">
+                                    No major missing skills.
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STRENGTHS / RISKS -->
+
+                <div class="candidate-detail-grid">
+
+                    <div class="candidate-detail-box">
+
+                        <h3>
+                            Candidate Strengths
+                        </h3>
+
+
+                        {% if candidate.strengths %}
+
+                        <ul class="result-list success-list">
+
+                            {% for item in candidate.strengths %}
+
+                            <li>
+                                {{ item }}
+                            </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                        {% else %}
+
+                        <p class="empty-text">
+                            No strengths returned.
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="candidate-detail-box">
+
+                        <h3>
+                            Hiring Risks / Gaps
+                        </h3>
+
+
+                        {% if candidate.risks %}
+
+                        <ul class="result-list warning-list">
+
+                            {% for item in candidate.risks %}
+
+                            <li>
+                                {{ item }}
+                            </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                        {% else %}
+
+                        <p class="empty-text">
+                            No major risks detected.
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                {% if candidate.rank == 1 %}
+
+                <div class="top-candidate-banner">
+
+                    <strong>
+                        Top Recommended Candidate
+                    </strong>
+
+                    <span>
+                        Highest overall match for this hiring requirement.
+                    </span>
+
+                </div>
+
+                {% endif %}
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- ==================================================
+             RECRUITER SUMMARY
+        =================================================== -->
+
+        <section class="panel recruiter-summary-panel">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Hiring Decision Support
+                    </span>
+
+                    <h2>
+                        How to Use This Ranking
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="recruiter-help-grid">
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        01
+                    </span>
+
+                    <h3>
+                        Final Score
+                    </h3>
+
+                    <p>
+                        Overall suitability for the target role
+                        based on the Resume content and hiring context.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        02
+                    </span>
+
+                    <h3>
+                        ATS Score
+                    </h3>
+
+                    <p>
+                        Measures Resume quality, structure,
+                        keywords and candidate presentation.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        03
+                    </span>
+
+                    <h3>
+                        JD Match
+                    </h3>
+
+                    <p>
+                        Measures alignment with the supplied
+                        Job Description.
+                    </p>
+
+                </div>
+
+
+                <div class="help-card">
+
+                    <span class="help-number">
+                        04
+                    </span>
+
+                    <h3>
+                        Human Review
+                    </h3>
+
+                    <p>
+                        Use AI ranking as decision support,
+                        not as the sole hiring decision.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        {% else %}
+
+        <section class="panel empty-state">
+
+            <div class="empty-state-icon">
+                AI
+            </div>
+
+            <h2>
+                No Candidates Ranked
+            </h2>
+
+            <p>
+                The system did not return candidate ranking results.
+            </p>
+
+        </section>
+
+        {% endif %}
+
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

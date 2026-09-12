@@ -1,70 +1,1233 @@
 {% extends "base.html" %}
 
+{% block title %}
+CareerMind AI — AI-Powered Career Intelligence Platform
+{% endblock %}
+
+
 {% block content %}
-<h2> Welcome to Your Dashboard,{{user}}</h2>
 
-<div class ="card"> 
-   <h3> Resume Analyzer</h3>
-   <form method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".pdf,.doc,.docx">
-    <textarea name="text" placeholder="Paste your resume text here"></textarea>
-    <input name="role" placeholder="what do you want to become? (e.g frontend developer)" required>
-    <button type="submit">Analyze Resume</button>
-    </form>
+<div class="page-container">
 
-</div>
+    <!-- ==================================================
+         HERO
+    =================================================== -->
+
+    <section class="page-hero">
+
+        <div>
+            <span class="eyebrow">
+                AI Resume Intelligence
+            </span>
+
+            <h1>
+                CareerMind AI — AI-Powered Resume Analyzer
+            </h1>
+
+            <p>
+                Analyze your Resume/CV for ATS compatibility,
+                job-description matching, missing skills,
+                keywords, projects, career opportunities and
+                interview preparation.
+            </p>
+        </div>
+
+    </section>
 
 
-{% if result %}
-    <div class="results-grid">>
+    <!-- ==================================================
+         ANALYSIS FORM
+    =================================================== -->
+
+    <section class="panel">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>
+                    Analyze Your Resume
+                </h2>
+
+                <p>
+                    Upload a genuine PDF/DOCX Resume or paste
+                    your Resume text below.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="analysis-form"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="file">
+                        Upload Resume/CV
+                    </label>
+
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".pdf,.docx"
+                    >
+
+                    <small>
+                        Supported: PDF, DOCX • Maximum 10 MB
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="role">
+                        Target Job Role *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="role"
+                        name="role"
+                        placeholder="Example: AI/ML Engineer"
+                        required
+                    >
+
+                    <small>
+                        Enter the role you want to apply for.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="text">
+                    Or Paste Resume Text
+                </label>
+
+                <textarea
+                    id="text"
+                    name="text"
+                    rows="8"
+                    placeholder="Paste complete Resume/CV text here..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="job_description">
+                    Job Description
+                    <span class="optional">
+                        (Optional)
+                    </span>
+                </label>
+
+                <textarea
+                    id="job_description"
+                    name="job_description"
+                    rows="8"
+                    placeholder="Paste the target company's Job Description here for Resume vs JD analysis..."
+                ></textarea>
+
+                <small>
+                    Adding a JD enables detailed skill matching
+                    and JD Match Score.
+                </small>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn large-btn"
+            >
+                Analyze Resume
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==================================================
+         RESULTS
+    =================================================== -->
+
+    {% if result %}
+
+
+        <!-- ERROR -->
+
         {% if result.error %}
-        <p style="color:#ff00c8;">{{result.error}}</p>
+
+        <section class="alert-card error-card">
+
+            <h3>
+                Analysis Failed
+            </h3>
+
+            <p>
+                {{ result.error }}
+            </p>
+
+            <p class="small-muted">
+                Please upload a genuine Resume/CV containing
+                readable candidate information.
+            </p>
+
+        </section>
+
+
+        {% else %}
+
+
+        <!-- ==============================================
+             REPORT ACTIONS
+        =============================================== -->
+
+        <section class="result-actions">
+
+            <div>
+
+                <h2>
+                    Resume Analysis Complete
+                </h2>
+
+                <p>
+                    Review your AI-generated career analysis below.
+                </p>
+
+            </div>
+
+
+            {% if result.report_id %}
+
+            <a
+                href="{{ url_for('download_report_pdf', report_id=result.report_id) }}"
+                class="primary-btn"
+            >
+                Download Full Analysis PDF
+            </a>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             MAIN SCORES
+        =============================================== -->
+
+        <section class="score-grid">
+
+            <div class="score-card">
+
+                <span class="score-label">
+                    ATS Score
+                </span>
+
+                <div class="score-number">
+                    {{ result.ats_score | default(0) }}
+                    <small>%</small>
+                </div>
+
+                <div class="progress-track">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ result.ats_score | default(0) }}%;"
+                    ></div>
+
+                </div>
+
+                <p>
+                    Overall ATS compatibility and resume quality.
+                </p>
+
+            </div>
+
+
+            <div class="score-card">
+
+                <span class="score-label">
+                    JD Match
+                </span>
+
+                <div class="score-number">
+                    {{ result.jd_match_score | default(0) }}
+                    <small>%</small>
+                </div>
+
+                <div class="progress-track">
+
+                    <div
+                        class="progress-fill"
+                        style="width: {{ result.jd_match_score | default(0) }}%;"
+                    ></div>
+
+                </div>
+
+                <p>
+                    Match between your Resume and supplied Job Description.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             AI CAREER SUMMARY
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        AI Overview
+                    </span>
+
+                    <h2>
+                        Career Summary
+                    </h2>
+                </div>
+
+            </div>
+
+            <div class="summary-box">
+
+                {{ result.resume_summary | default("No summary available.") }}
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             SECTION-WISE ATS
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>
+                        Section-wise ATS Score
+                    </h2>
+
+                    <p>
+                        Performance of individual Resume sections.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="section-score-grid">
+
+                {% for section, score in result.section_scores.items() %}
+
+                <div class="section-score-item">
+
+                    <div class="section-score-header">
+
+                        <span>
+                            {{ section | replace("_", " ") | title }}
+                        </span>
+
+                        <strong>
+                            {{ score }}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-track small">
+
+                        <div
+                            class="progress-fill"
+                            style="width: {{ score }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             SKILLS
+        =============================================== -->
+
+        <section class="three-column-grid">
+
+            <!-- CORE SKILLS -->
+
+            <div class="panel">
+
+                <div class="card-title">
+
+                    <h3>
+                        Detected Skills
+                    </h3>
+
+                </div>
+
+
+                <div class="tag-container">
+
+                    {% if result.skills %}
+
+                        {% for skill in result.skills %}
+
+                        <span class="tag">
+                            {{ skill }}
+                        </span>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No skills detected.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- MATCHED SKILLS -->
+
+            <div class="panel">
+
+                <div class="card-title">
+
+                    <h3>
+                        Matched Skills
+                    </h3>
+
+                </div>
+
+
+                <div class="tag-container">
+
+                    {% if result.matched_skills %}
+
+                        {% for skill in result.matched_skills %}
+
+                        <span class="tag success-tag">
+                            {{ skill }}
+                        </span>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            Add a Job Description to improve matching.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- MISSING SKILLS -->
+
+            <div class="panel">
+
+                <div class="card-title">
+
+                    <h3>
+                        Missing Skills
+                    </h3>
+
+                </div>
+
+
+                <div class="tag-container">
+
+                    {% if result.missing_skills %}
+
+                        {% for skill in result.missing_skills %}
+
+                        <span class="tag warning-tag">
+                            {{ skill }}
+                        </span>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <p class="empty-text">
+                            No major missing skills detected.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             KEYWORD SUGGESTIONS
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>
+                        ATS Keyword Suggestions
+                    </h2>
+
+                    <p>
+                        Relevant keywords that can improve Resume targeting.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="tag-container">
+
+                {% if result.keyword_suggestions %}
+
+                    {% for keyword in result.keyword_suggestions %}
+
+                    <span class="tag keyword-tag">
+                        {{ keyword }}
+                    </span>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p class="empty-text">
+                        No additional keywords suggested.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             STRENGTHS / WEAKNESSES
+        =============================================== -->
+
+        <section class="two-column-grid">
+
+            <div class="panel">
+
+                <div class="card-title">
+
+                    <h3>
+                        Resume Strengths
+                    </h3>
+
+                </div>
+
+
+                {% if result.strengths %}
+
+                <ul class="result-list success-list">
+
+                    {% for item in result.strengths %}
+
+                    <li>
+                        {{ item }}
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% else %}
+
+                <p class="empty-text">
+                    No strengths returned.
+                </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="card-title">
+
+                    <h3>
+                        Weaknesses / Gaps
+                    </h3>
+
+                </div>
+
+
+                {% if result.weaknesses %}
+
+                <ul class="result-list warning-list">
+
+                    {% for item in result.weaknesses %}
+
+                    <li>
+                        {{ item }}
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+                {% else %}
+
+                <p class="empty-text">
+                    No major weaknesses returned.
+                </p>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             IMPROVEMENTS
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>
+                        Resume Improvement Suggestions
+                    </h2>
+
+                    <p>
+                        Practical improvements for ATS and recruiters.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if result.improvement_suggestions %}
+
+            <ol class="number-list">
+
+                {% for item in result.improvement_suggestions %}
+
+                <li>
+
+                    <span class="number-badge">
+                        {{ loop.index }}
+                    </span>
+
+                    <p>
+                        {{ item }}
+                    </p>
+
+                </li>
+
+                {% endfor %}
+
+            </ol>
+
+            {% else %}
+
+            <p class="empty-text">
+                No improvement suggestions available.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             BEFORE / AFTER RESUME REWRITE
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        AI Resume Rewriter
+                    </span>
+
+                    <h2>
+                        Before & After Resume Improvement
+                    </h2>
+
+                    <p>
+                        AI improves wording without inventing candidate facts.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if result.rewritten_bullets %}
+
+                {% for item in result.rewritten_bullets %}
+
+                <div class="rewrite-card">
+
+                    <div class="rewrite-column before">
+
+                        <span class="rewrite-label">
+                            BEFORE
+                        </span>
+
+                        <p>
+                            {{ item.original }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="rewrite-arrow">
+                        →
+                    </div>
+
+
+                    <div class="rewrite-column after">
+
+                        <span class="rewrite-label">
+                            AFTER
+                        </span>
+
+                        <p>
+                            {{ item.improved }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+            <p class="empty-text">
+                No Resume bullet rewrites were generated.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             JOB ROLE RECOMMENDATIONS
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        Career Matching
+                    </span>
+
+                    <h2>
+                        Recommended Job Roles
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            {% if result.job_recommendations %}
+
+            <div class="job-grid">
+
+                {% for job in result.job_recommendations %}
+
+                <div class="job-card">
+
+                    <div class="job-card-top">
+
+                        <h3>
+                            {{ job.role }}
+                        </h3>
+
+                        <span class="fit-score">
+                            {{ job.fit_score }}%
+                        </span>
+
+                    </div>
+
+                    <div class="progress-track small">
+
+                        <div
+                            class="progress-fill"
+                            style="width: {{ job.fit_score }}%;"
+                        ></div>
+
+                    </div>
+
+                    <p>
+                        {{ job.reason }}
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="empty-text">
+                No job-role recommendations available.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             PROJECT QUALITY ANALYZER
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        Project Intelligence
+                    </span>
+
+                    <h2>
+                        Project Quality Analyzer
+                    </h2>
+
+                    <p>
+                        Evaluation of projects mentioned in your Resume.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if result.project_analysis %}
+
+            <div class="project-grid">
+
+                {% for project in result.project_analysis %}
+
+                <article class="project-analysis-card">
+
+                    <div class="project-analysis-header">
+
+                        <h3>
+                            {{ project.project }}
+                        </h3>
+
+                        <span class="project-score">
+                            {{ project.score }}/100
+                        </span>
+
+                    </div>
+
+
+                    <div class="project-analysis-body">
+
+                        <div>
+
+                            <h4>
+                                Strengths
+                            </h4>
+
+                            {% if project.strengths %}
+
+                            <ul class="result-list">
+
+                                {% for item in project.strengths %}
+
+                                <li>
+                                    {{ item }}
+                                </li>
+
+                                {% endfor %}
+
+                            </ul>
+
+                            {% else %}
+
+                            <p class="empty-text">
+                                No strengths listed.
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div>
+
+                            <h4>
+                                Improvements
+                            </h4>
+
+                            {% if project.improvements %}
+
+                            <ul class="result-list">
+
+                                {% for item in project.improvements %}
+
+                                <li>
+                                    {{ item }}
+                                </li>
+
+                                {% endfor %}
+
+                            </ul>
+
+                            {% else %}
+
+                            <p class="empty-text">
+                                No improvements listed.
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="empty-text">
+                No project information was available for analysis.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             SKILL GAP ROADMAP
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        Learning Plan
+                    </span>
+
+                    <h2>
+                        Skill Gap Roadmap
+                    </h2>
+
+                    <p>
+                        Recommended next steps for your target role.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if result.roadmap %}
+
+            <div class="roadmap">
+
+                {% for step in result.roadmap %}
+
+                <div class="roadmap-item">
+
+                    <div class="roadmap-number">
+                        {{ step.step | default(loop.index) }}
+                    </div>
+
+
+                    <div class="roadmap-content">
+
+                        <h3>
+                            {{ step.skill }}
+                        </h3>
+
+                        <p>
+                            <strong>Why:</strong>
+                            {{ step.why }}
+                        </p>
+
+                        <p>
+                            <strong>Action:</strong>
+                            {{ step.action }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="empty-text">
+                No roadmap generated.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             INTERVIEW PREPARATION
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        Interview Preparation
+                    </span>
+
+                    <h2>
+                        Personalized Interview Questions
+                    </h2>
+
+                    <p>
+                        Questions generated from your Resume and target role.
+                    </p>
+                </div>
+
+
+                <a
+                    href="{{ url_for('mock_interview') }}"
+                    class="secondary-btn"
+                >
+                    Start Mock Interview
+                </a>
+
+            </div>
+
+
+            {% if result.interview_questions %}
+
+            <div class="interview-question-list">
+
+                {% for item in result.interview_questions %}
+
+                <article class="question-card">
+
+                    <div class="question-number">
+                        {{ loop.index }}
+                    </div>
+
+
+                    <div>
+
+                        <div class="question-meta">
+
+                            <span class="question-type">
+                                {{ item.type | default("Interview") }}
+                            </span>
+
+                            {% if item.focus %}
+
+                            <span>
+                                Focus: {{ item.focus }}
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <h3>
+                            {{ item.question }}
+                        </h3>
+
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="empty-text">
+                No interview questions generated.
+            </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
+             ADVANCED TOOLS
+        =============================================== -->
+
+        <section class="panel advanced-tools-panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">
+                        Continue Your Preparation
+                    </span>
+
+                    <h2>
+                        Advanced Career Tools
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <div class="advanced-tools-grid">
+
+                <a
+                    href="{{ url_for('mock_interview') }}"
+                    class="tool-card"
+                >
+
+                    <span class="tool-icon">
+                        01
+                    </span>
+
+                    <h3>
+                        AI Mock Interview
+                    </h3>
+
+                    <p>
+                        Practice personalized questions and
+                        receive AI answer evaluation.
+                    </p>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('resume_builder') }}"
+                    class="tool-card"
+                >
+
+                    <span class="tool-icon">
+                        02
+                    </span>
+
+                    <h3>
+                        ATS Resume Builder
+                    </h3>
+
+                    <p>
+                        Build an ATS-friendly professional Resume
+                        and download it as PDF.
+                    </p>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('recruiter') }}"
+                    class="tool-card"
+                >
+
+                    <span class="tool-icon">
+                        03
+                    </span>
+
+                    <h3>
+                        Recruiter Dashboard
+                    </h3>
+
+                    <p>
+                        Compare and rank multiple candidate
+                        resumes for the same role.
+                    </p>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="tool-card"
+                >
+
+                    <span class="tool-icon">
+                        04
+                    </span>
+
+                    <h3>
+                        Analysis History
+                    </h3>
+
+                    <p>
+                        Review previous Resume analyses and
+                        download saved reports.
+                    </p>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
         {% endif %}
 
-        <div class="result-card">
-    <h3> Skills</h3>
-    <ul>
-        {% for skill in result.skills %}
-        <li>{{ skill }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-        <div class="result-card">
-    <h3>⚠ Missing Skills</h3>
-    <ul>
-        {% for skill in result.missing_skills %}
-        <li>{{ skill }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-        
-        <div class="result-card">
-    <h3>🗺 Roadmap</h3>
-    <ul>
-        {% for skill in result.roadmap %}
-        <li>{{ skill }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-        
-        <div class="result-card">
-    <h3>🎯 Interview Questions</h3>
-    <ul>
-        {% for skill in result.interview_questions %}
-        <li>{{ skill }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-    </div>
     {% endif %}
 
+</div>
 
 {% endblock %}

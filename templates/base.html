@@ -1,42 +1,277 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Career Copilot</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>
+        {% block title %}
+        CareerMind AI
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 </head>
-<body>
-    <header>
-        <div class="container">
-            <nav>
-               <nav>
-    <div class="logo">
-          AI Career Copilot
-    </div>
 
-    <div class="nav-links">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/history">History</a>
-        <a href="/logout">Logout</a>
-    </div>
-</nav>
+
+<body>
+
+    <!-- ==================================================
+         NAVBAR
+    =================================================== -->
+
+    <header class="navbar">
+
+        <div class="nav-container">
+
+            <a
+                href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}"
+                class="brand"
+            >
+                <span class="brand-icon">AI</span>
+
+                <span>
+                    CareerMind AI
+                </span>
+            </a>
+
+
+            {% if session.get("user_id") %}
+
+            <nav class="nav-links">
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="{% if request.endpoint == 'dashboard' %}active{% endif %}"
+                >
+                    Dashboard
+                </a>
+
+
+                <a
+                    href="{{ url_for('recruiter') }}"
+                    class="{% if request.endpoint == 'recruiter' %}active{% endif %}"
+                >
+                    Recruiter
+                </a>
+
+
+                <a
+                    href="{{ url_for('mock_interview') }}"
+                    class="{% if request.endpoint == 'mock_interview' %}active{% endif %}"
+                >
+                    Mock Interview
+                </a>
+
+
+                <a
+                    href="{{ url_for('resume_builder') }}"
+                    class="{% if request.endpoint == 'resume_builder' %}active{% endif %}"
+                >
+                    Resume Builder
+                </a>
+
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="{% if request.endpoint == 'history' %}active{% endif %}"
+                >
+                    History
+                </a>
+
             </nav>
-        </div>  
+
+
+            <div class="nav-user">
+
+                <span class="user-name">
+
+                    {{ session.get("user_name", "User") }}
+
+                </span>
+
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="logout-btn"
+                >
+                    Logout
+                </a>
+
+            </div>
+
+
+            {% else %}
+
+
+            <nav class="nav-links">
+
+                <a
+                    href="{{ url_for('login') }}"
+                >
+                    Login
+                </a>
+
+
+                <a
+                    href="{{ url_for('signup') }}"
+                    class="nav-signup"
+                >
+                    Create Account
+                </a>
+
+            </nav>
+
+
+            {% endif %}
+
+        </div>
+
     </header>
-    <main  class="container">
+
+
+    <!-- ==================================================
+         FLASH MESSAGES
+    =================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- ==================================================
+         MAIN PAGE
+    =================================================== -->
+
+    <main class="main-content">
 
         {% block content %}
-        {% endblock %} 
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 AI Career Copilot.</p>
-        </div>
-    </footer>
-</body>
-</html>
 
+        {% endblock %}
+
+    </main>
+
+
+    <!-- ==================================================
+         FOOTER
+    =================================================== -->
+
+    <footer class="footer">
+
+        <div class="footer-inner">
+
+            <div>
+
+                <strong>
+                    CareerMind AI — AI-Powered Career Intelligence Platform
+                </strong>
+
+                <p>
+                    Resume analysis, career preparation
+                    and AI-powered recruitment tools.
+                </p>
+
+            </div>
+
+
+            <div class="footer-right">
+
+                <span>
+                    Built with Python, Flask & AI
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ==================================================
+         SMALL FRONTEND HELPERS
+    =================================================== -->
+
+    <script>
+
+        // Automatically hide flash messages.
+
+        setTimeout(function () {
+
+            const messages =
+                document.querySelectorAll(
+                    ".flash-message"
+                );
+
+            messages.forEach(function (message) {
+
+                message.style.opacity = "0";
+
+                message.style.transform =
+                    "translateY(-5px)";
+
+                setTimeout(function () {
+
+                    message.remove();
+
+                }, 400);
+
+            });
+
+        }, 5000);
+
+
+        // Mobile navigation helper.
+
+        function toggleNavigation() {
+
+            const navigation =
+                document.querySelector(
+                    ".nav-links"
+                );
+
+            if (navigation) {
+
+                navigation.classList.toggle(
+                    "show"
+                );
+
+            }
+
+        }
+
+    </script>
+
+
+    {% block scripts %}
+
+    {% endblock %}
+
+</body>
+
+</html>

@@ -1,42 +1,794 @@
 {% extends "base.html" %}
 
+{% block title %}
+Analysis History | AI Career Copilot
+{% endblock %}
+
+
 {% block content %}
 
-<h2> Your History</h2>
-{% for r in reports %}
-<div class="cards">
-    <p><strong> Resume Preview:</strong></p>
-    <p>{{ r.resume[:150] }}</p>
+<div class="page-container">
 
-    <hr>
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
 
-    <h3> Skills</h3>
-        <ul>
-            {% for skill in r.result.skills %}
-            <li>{{ skill }}</li>
-            {% endfor %}
-        </ul>
+    <section class="page-hero">
 
-        <h3> Missing Skills</h3>
-        <ul>
-            {% for skill in r.result.missing_skills %}
-            <li>{{ skill }}</li>
-            {% endfor %}
-        </ul>
- 
-        <h3> Roadmap</h3>
-        <ul>
-            {% for skill in r.result.roadmap %}
-            <li>{{ skill }}</li>
-            {% endfor %}
-        </ul>
- 
-        <h3> Interview Questions</h3>
-        <ul>
-            {% for skill in r.result.interview_questions %}
-            <li>{{ skill }}</li>
-            {% endfor %}
-        </ul>
-     </div>
-{% endfor %}
+        <div>
+            <span class="eyebrow">
+                Saved Reports
+            </span>
+
+            <h1>
+                Resume Analysis History
+            </h1>
+
+            <p>
+                Review your previous Resume analyses and
+                download any saved AI report as PDF.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         HISTORY CONTENT
+    =================================================== -->
+
+    {% if reports %}
+
+    <div class="history-list">
+
+        {% for item in reports %}
+
+        <article class="history-card">
+
+            <!-- HEADER -->
+
+            <div class="history-card-header">
+
+                <div>
+
+                    <span class="history-id">
+                        Report #{{ item.id }}
+                    </span>
+
+                    <h2>
+                        {{ item.target_role }}
+                    </h2>
+
+
+                    {% if item.filename %}
+
+                    <p class="history-file">
+                        Resume:
+                        <strong>
+                            {{ item.filename }}
+                        </strong>
+                    </p>
+
+                    {% else %}
+
+                    <p class="history-file">
+                        Resume:
+                        <strong>
+                            Pasted Resume Text
+                        </strong>
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('download_report_pdf', report_id=item.id) }}"
+                    class="primary-btn"
+                >
+                    Download PDF
+                </a>
+
+            </div>
+
+
+            {% set result = item.result %}
+
+
+            <!-- ==========================================
+                 MAIN SCORES
+            =========================================== -->
+
+            <div class="history-score-grid">
+
+                <div class="history-score-box">
+
+                    <span>
+                        ATS Score
+                    </span>
+
+                    <strong>
+                        {{ result.get("ats_score", 0) }}%
+                    </strong>
+
+                </div>
+
+
+                <div class="history-score-box">
+
+                    <span>
+                        JD Match
+                    </span>
+
+                    <strong>
+                        {{ result.get("jd_match_score", 0) }}%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 SUMMARY
+            =========================================== -->
+
+            {% if result.get("resume_summary") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Career Summary
+                </h3>
+
+                <p>
+                    {{ result.get("resume_summary") }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 SECTION SCORES
+            =========================================== -->
+
+            {% if result.get("section_scores") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Section Scores
+                </h3>
+
+
+                <div class="mini-score-grid">
+
+                    {% for section, score in result.get("section_scores", {}).items() %}
+
+                    <div class="mini-score-item">
+
+                        <span>
+                            {{ section | replace("_", " ") | title }}
+                        </span>
+
+                        <strong>
+                            {{ score }}%
+                        </strong>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 SKILLS
+            =========================================== -->
+
+            <div class="history-two-column">
+
+                <!-- DETECTED -->
+
+                <div class="history-section">
+
+                    <h3>
+                        Detected Skills
+                    </h3>
+
+
+                    <div class="tag-container">
+
+                        {% if result.get("skills") %}
+
+                            {% for skill in result.get("skills", []) %}
+
+                            <span class="tag">
+                                {{ skill }}
+                            </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="empty-text">
+                                No skills available.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- MISSING -->
+
+                <div class="history-section">
+
+                    <h3>
+                        Missing Skills
+                    </h3>
+
+
+                    <div class="tag-container">
+
+                        {% if result.get("missing_skills") %}
+
+                            {% for skill in result.get("missing_skills", []) %}
+
+                            <span class="tag warning-tag">
+                                {{ skill }}
+                            </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="empty-text">
+                                No missing skills available.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 STRENGTHS & WEAKNESSES
+            =========================================== -->
+
+            <div class="history-two-column">
+
+                <div class="history-section">
+
+                    <h3>
+                        Strengths
+                    </h3>
+
+
+                    {% if result.get("strengths") %}
+
+                    <ul class="result-list success-list">
+
+                        {% for strength in result.get("strengths", []) %}
+
+                        <li>
+                            {{ strength }}
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                    {% else %}
+
+                    <p class="empty-text">
+                        No strengths saved.
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="history-section">
+
+                    <h3>
+                        Weaknesses
+                    </h3>
+
+
+                    {% if result.get("weaknesses") %}
+
+                    <ul class="result-list warning-list">
+
+                        {% for weakness in result.get("weaknesses", []) %}
+
+                        <li>
+                            {{ weakness }}
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                    {% else %}
+
+                    <p class="empty-text">
+                        No weaknesses saved.
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 IMPROVEMENTS
+            =========================================== -->
+
+            {% if result.get("improvement_suggestions") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Improvement Suggestions
+                </h3>
+
+
+                <ol class="simple-number-list">
+
+                    {% for suggestion in result.get("improvement_suggestions", []) %}
+
+                    <li>
+                        {{ suggestion }}
+                    </li>
+
+                    {% endfor %}
+
+                </ol>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 KEYWORDS
+            =========================================== -->
+
+            {% if result.get("keyword_suggestions") %}
+
+            <div class="history-section">
+
+                <h3>
+                    ATS Keywords
+                </h3>
+
+
+                <div class="tag-container">
+
+                    {% for keyword in result.get("keyword_suggestions", []) %}
+
+                    <span class="tag keyword-tag">
+                        {{ keyword }}
+                    </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 REWRITTEN BULLETS
+            =========================================== -->
+
+            {% if result.get("rewritten_bullets") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Resume Rewrite
+                </h3>
+
+
+                {% for bullet in result.get("rewritten_bullets", []) %}
+
+                {% if bullet is mapping %}
+
+                <div class="history-rewrite">
+
+                    <div>
+
+                        <span class="history-small-label">
+                            Before
+                        </span>
+
+                        <p>
+                            {{ bullet.get("original", "") }}
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="history-small-label">
+                            After
+                        </span>
+
+                        <p>
+                            {{ bullet.get("improved", "") }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                {% else %}
+
+                <p>
+                    {{ bullet }}
+                </p>
+
+                {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 JOB RECOMMENDATIONS
+            =========================================== -->
+
+            {% if result.get("job_recommendations") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Recommended Job Roles
+                </h3>
+
+
+                <div class="history-job-grid">
+
+                    {% for job in result.get("job_recommendations", []) %}
+
+                    {% if job is mapping %}
+
+                    <div class="history-job-card">
+
+                        <div class="history-job-title">
+
+                            <strong>
+                                {{ job.get("role", "") }}
+                            </strong>
+
+                            <span>
+                                {{ job.get("fit_score", 0) }}%
+                            </span>
+
+                        </div>
+
+                        <p>
+                            {{ job.get("reason", "") }}
+                        </p>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="history-job-card">
+                        {{ job }}
+                    </div>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 ROADMAP
+            =========================================== -->
+
+            {% if result.get("roadmap") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Skill Gap Roadmap
+                </h3>
+
+
+                <div class="history-roadmap">
+
+                    {% for step in result.get("roadmap", []) %}
+
+                    {% if step is mapping %}
+
+                    <div class="history-roadmap-item">
+
+                        <span class="roadmap-number">
+                            {{ step.get("step", loop.index) }}
+                        </span>
+
+
+                        <div>
+
+                            <strong>
+                                {{ step.get("skill", "") }}
+                            </strong>
+
+                            {% if step.get("why") %}
+
+                            <p>
+                                <b>Why:</b>
+                                {{ step.get("why") }}
+                            </p>
+
+                            {% endif %}
+
+
+                            {% if step.get("action") %}
+
+                            <p>
+                                <b>Action:</b>
+                                {{ step.get("action") }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="history-roadmap-item">
+
+                        <span class="roadmap-number">
+                            {{ loop.index }}
+                        </span>
+
+                        <div>
+                            {{ step }}
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 PROJECT ANALYSIS
+            =========================================== -->
+
+            {% if result.get("project_analysis") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Project Analysis
+                </h3>
+
+
+                <div class="history-project-grid">
+
+                    {% for project in result.get("project_analysis", []) %}
+
+                    {% if project is mapping %}
+
+                    <div class="history-project-card">
+
+                        <div class="history-project-header">
+
+                            <strong>
+                                {{ project.get("project", "") }}
+                            </strong>
+
+                            <span>
+                                {{ project.get("score", 0) }}/100
+                            </span>
+
+                        </div>
+
+
+                        {% if project.get("strengths") %}
+
+                        <p>
+                            <b>Strengths:</b>
+                            {{ project.get("strengths", []) | join(", ") }}
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if project.get("improvements") %}
+
+                        <p>
+                            <b>Improvements:</b>
+                            {{ project.get("improvements", []) | join(", ") }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="history-project-card">
+                        {{ project }}
+                    </div>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 INTERVIEW QUESTIONS
+            =========================================== -->
+
+            {% if result.get("interview_questions") %}
+
+            <div class="history-section">
+
+                <h3>
+                    Interview Questions
+                </h3>
+
+
+                <div class="history-question-list">
+
+                    {% for question in result.get("interview_questions", []) %}
+
+                    <div class="history-question">
+
+                        <span>
+                            {{ loop.index }}
+                        </span>
+
+
+                        <div>
+
+                            {% if question is mapping %}
+
+                            <strong>
+                                {{ question.get("question", "") }}
+                            </strong>
+
+                            {% if question.get("type") %}
+
+                            <small>
+                                {{ question.get("type") }}
+                            </small>
+
+                            {% endif %}
+
+                            {% else %}
+
+                            <strong>
+                                {{ question }}
+                            </strong>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- ==========================================
+                 CARD FOOTER
+            =========================================== -->
+
+            <div class="history-card-footer">
+
+                <a
+                    href="{{ url_for('download_report_pdf', report_id=item.id) }}"
+                    class="secondary-btn"
+                >
+                    Download Full Report
+                </a>
+
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="text-link"
+                >
+                    Analyze Another Resume →
+                </a>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+    <!-- ==================================================
+         EMPTY STATE
+    =================================================== -->
+
+    <section class="panel empty-state">
+
+        <div class="empty-state-icon">
+            AI
+        </div>
+
+        <h2>
+            No Resume Analysis History Yet
+        </h2>
+
+        <p>
+            Analyze your first Resume and your reports
+            will automatically appear here.
+        </p>
+
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="primary-btn"
+        >
+            Analyze Resume
+        </a>
+
+    </section>
+
+    {% endif %}
+
+</div>
+
 {% endblock %}

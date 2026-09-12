@@ -1,0 +1,1306 @@
+{% extends "base.html" %}
+
+{% block title %}
+Oral Mock Interview | AI Career Copilot
+{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+
+    <section class="page-hero">
+        <div>
+            <span class="eyebrow">AI Interview Agent</span>
+            <h1>Oral Mock Interview</h1>
+            <p>
+                Practice a real interview experience. The AI asks questions aloud,
+                you answer using your microphone, and your responses are evaluated.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- =====================================================
+         INTERVIEW SETUP
+    ====================================================== -->
+
+    {% if not questions %}
+
+    <section class="panel">
+
+        <div class="section-heading">
+            <div>
+                <h2>Start Your Interview</h2>
+                <p>
+                    Upload your Resume or use your latest analyzed Resume.
+                    The AI will generate personalized interview questions.
+                </p>
+            </div>
+        </div>
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="analysis-form"
+        >
+
+            <input type="hidden" name="action" value="generate">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="role">
+                        Target Job Role *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="role"
+                        name="role"
+                        value="{{ role | default('') }}"
+                        placeholder="Example: AI/ML Engineer"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="file">
+                        Upload Resume
+                    </label>
+
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".pdf,.docx"
+                    >
+
+                    <small>
+                        PDF/DOCX only. You may leave this empty if
+                        you already analyzed a Resume in the dashboard.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="text">
+                    Or Paste Resume Text
+                </label>
+
+                <textarea
+                    id="text"
+                    name="text"
+                    rows="7"
+                    placeholder="Paste Resume/CV text here..."
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn large-btn"
+            >
+                Generate Oral Interview
+            </button>
+
+        </form>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         ORAL INTERVIEW
+    ====================================================== -->
+
+    {% if questions %}
+
+    <section class="panel">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="eyebrow">Live Interview</span>
+                <h2>{{ role }}</h2>
+                <p>
+                    Allow microphone permission when your browser asks.
+                    Use Chrome or Edge for best speech-recognition support.
+                </p>
+            </div>
+
+            <div class="interview-progress-info">
+                <span id="questionCounter">
+                    Question 1 of {{ questions|length }}
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="oral-interview-shell">
+
+            <!-- INTERVIEWER -->
+
+            <div class="interviewer-panel">
+
+                <div class="interviewer-avatar">
+                    AI
+                </div>
+
+                <div class="interviewer-status">
+
+                    <span id="interviewerStatus">
+                        Ready
+                    </span>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="repeatQuestionBtn"
+                    class="secondary-btn"
+                >
+                    Repeat Question
+                </button>
+
+            </div>
+
+
+            <!-- QUESTION AREA -->
+
+            <div class="oral-question-area">
+
+                <span
+                    id="questionType"
+                    class="question-type"
+                ></span>
+
+                <h2 id="questionText"></h2>
+
+                <div
+                    id="goodAnswerHint"
+                    class="answer-guidance"
+                ></div>
+
+
+                <div class="voice-controls">
+
+                    <button
+                        type="button"
+                        id="startAnswerBtn"
+                        class="primary-btn large-btn"
+                    >
+                        Start Answer
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="stopAnswerBtn"
+                        class="secondary-btn large-btn"
+                        disabled
+                    >
+                        Stop Answer
+                    </button>
+
+                </div>
+
+
+                <div class="mic-status-card">
+
+                    <div
+                        id="micIndicator"
+                        class="mic-indicator"
+                    >
+                        MIC
+                    </div>
+
+                    <div>
+                        <strong id="micStatus">
+                            Microphone idle
+                        </strong>
+
+                        <p>
+                            Speak clearly and naturally.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="transcript-panel">
+
+                    <div class="transcript-header">
+
+                        <h3>
+                            Your Answer Transcript
+                        </h3>
+
+                        <span id="answerTimer">
+                            00:00
+                        </span>
+
+                    </div>
+
+                    <textarea
+                        id="liveTranscript"
+                        rows="8"
+                        placeholder="Your spoken answer will appear here..."
+                    ></textarea>
+
+                    <small>
+                        You may correct minor speech-recognition mistakes before submitting.
+                    </small>
+
+                </div>
+
+
+                <div class="interview-navigation">
+
+                    <button
+                        type="button"
+                        id="submitAnswerBtn"
+                        class="primary-btn"
+                    >
+                        Save Answer & Next Question
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HIDDEN EVALUATION FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        id="evaluationForm"
+        style="display:none;"
+    >
+
+        <input
+            type="hidden"
+            name="action"
+            value="evaluate"
+        >
+
+        <div id="hiddenAnswers"></div>
+
+    </form>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         FINAL EVALUATION
+    ====================================================== -->
+
+    {% if evaluation %}
+
+    <section class="panel">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="eyebrow">Interview Result</span>
+                <h2>Final Mock Interview Evaluation</h2>
+            </div>
+
+        </div>
+
+
+        <div class="score-grid">
+
+            <div class="score-card">
+
+                <span class="score-label">
+                    Overall Score
+                </span>
+
+                <div class="score-number">
+                    {{ evaluation.get("overall_score", 0) }}
+                    <small>/100</small>
+                </div>
+
+            </div>
+
+
+            <div class="score-card">
+
+                <span class="score-label">
+                    Hiring Signal
+                </span>
+
+                <div class="hire-signal">
+                    {{ evaluation.get("hire_signal", "N/A") }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="two-column-grid">
+
+            <div class="panel">
+
+                <h3>
+                    Strengths
+                </h3>
+
+                <ul class="result-list success-list">
+
+                    {% for item in evaluation.get("strengths", []) %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>
+                    Improvements
+                </h3>
+
+                <ul class="result-list warning-list">
+
+                    {% for item in evaluation.get("improvements", []) %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        {% if evaluation.get("answer_feedback") %}
+
+        <div class="feedback-list">
+
+            {% for item in evaluation.get("answer_feedback", []) %}
+
+            <div class="feedback-card">
+
+                <div class="feedback-header">
+
+                    <div>
+                        <span class="feedback-question-number">
+                            Question {{ loop.index }}
+                        </span>
+
+                        <h3>
+                            {{ item.get("question", "") }}
+                        </h3>
+                    </div>
+
+
+                    {% if item.get("score") is not none %}
+
+                    <span class="feedback-score">
+                        {{ item.get("score") }}/100
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if item.get("answer") %}
+
+                <div class="feedback-answer">
+
+                    <strong>
+                        Your Answer
+                    </strong>
+
+                    <p>
+                        {{ item.get("answer") }}
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+
+                <div class="feedback-grid">
+
+                    <div class="feedback-box">
+
+                        <h4>
+                            Strengths
+                        </h4>
+
+                        {% set strengths = item.get("strengths", []) %}
+
+                        {% if strengths is string %}
+
+                        <p>{{ strengths }}</p>
+
+                        {% else %}
+
+                        <ul class="result-list">
+
+                            {% for strength in strengths %}
+                            <li>{{ strength }}</li>
+                            {% endfor %}
+
+                        </ul>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="feedback-box">
+
+                        <h4>
+                            Improvements
+                        </h4>
+
+                        {% set improvements = item.get("improvements", []) %}
+
+                        {% if improvements is string %}
+
+                        <p>{{ improvements }}</p>
+
+                        {% else %}
+
+                        <ul class="result-list">
+
+                            {% for improvement in improvements %}
+                            <li>{{ improvement }}</li>
+                            {% endfor %}
+
+                        </ul>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                {% if item.get("better_answer") %}
+
+                <div class="better-answer">
+
+                    <strong>
+                        Better Answer Approach
+                    </strong>
+
+                    <p>
+                        {{ item.get("better_answer") }}
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="result-actions">
+
+            <div>
+                <h3>
+                    Practice Again
+                </h3>
+
+                <p>
+                    Repeat the interview after improving your weak areas.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('mock_interview') }}"
+                class="primary-btn"
+            >
+                Start New Interview
+            </a>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{% if questions %}
+
+<script>
+
+    // =====================================================
+    // QUESTIONS FROM FLASK
+    // =====================================================
+
+    const interviewQuestions = {{ questions | tojson }};
+
+
+    let currentQuestionIndex = 0;
+
+    let recognition = null;
+
+    let isListening = false;
+
+    let finalTranscript = "";
+
+    let answers = {};
+
+    let timerInterval = null;
+
+    let answerStartTime = null;
+
+
+    const questionCounter =
+        document.getElementById("questionCounter");
+
+    const questionType =
+        document.getElementById("questionType");
+
+    const questionText =
+        document.getElementById("questionText");
+
+    const goodAnswerHint =
+        document.getElementById("goodAnswerHint");
+
+    const interviewerStatus =
+        document.getElementById("interviewerStatus");
+
+    const startAnswerBtn =
+        document.getElementById("startAnswerBtn");
+
+    const stopAnswerBtn =
+        document.getElementById("stopAnswerBtn");
+
+    const submitAnswerBtn =
+        document.getElementById("submitAnswerBtn");
+
+    const repeatQuestionBtn =
+        document.getElementById("repeatQuestionBtn");
+
+    const liveTranscript =
+        document.getElementById("liveTranscript");
+
+    const micIndicator =
+        document.getElementById("micIndicator");
+
+    const micStatus =
+        document.getElementById("micStatus");
+
+    const answerTimer =
+        document.getElementById("answerTimer");
+
+
+    // =====================================================
+    // SPEECH SYNTHESIS
+    // =====================================================
+
+    function speakQuestion(text) {
+
+        if (!("speechSynthesis" in window)) {
+
+            interviewerStatus.textContent =
+                "Voice output not supported";
+
+            return;
+
+        }
+
+
+        window.speechSynthesis.cancel();
+
+
+        const utterance =
+            new SpeechSynthesisUtterance(text);
+
+
+        utterance.rate = 0.95;
+
+        utterance.pitch = 1;
+
+        utterance.volume = 1;
+
+
+        utterance.onstart = function () {
+
+            interviewerStatus.textContent =
+                "Asking question...";
+
+        };
+
+
+        utterance.onend = function () {
+
+            interviewerStatus.textContent =
+                "Waiting for your answer";
+
+        };
+
+
+        window.speechSynthesis.speak(
+            utterance
+        );
+
+    }
+
+
+    // =====================================================
+    // RENDER QUESTION
+    // =====================================================
+
+    function renderQuestion() {
+
+        const item =
+            interviewQuestions[
+                currentQuestionIndex
+            ];
+
+
+        questionCounter.textContent =
+            `Question ${currentQuestionIndex + 1} of ${interviewQuestions.length}`;
+
+
+        questionType.textContent =
+            item.type || "Interview Question";
+
+
+        questionText.textContent =
+            item.question || "";
+
+
+        if (
+            item.what_good_answer_should_cover
+        ) {
+
+            goodAnswerHint.textContent =
+                "Focus areas: " +
+                item.what_good_answer_should_cover;
+
+            goodAnswerHint.style.display =
+                "block";
+
+        } else {
+
+            goodAnswerHint.style.display =
+                "none";
+
+        }
+
+
+        finalTranscript = "";
+
+        liveTranscript.value = "";
+
+
+        startAnswerBtn.disabled =
+            false;
+
+        stopAnswerBtn.disabled =
+            true;
+
+
+        resetTimer();
+
+
+        setTimeout(
+            function () {
+
+                speakQuestion(
+                    item.question
+                );
+
+            },
+            500
+        );
+
+    }
+
+
+    // =====================================================
+    // SPEECH RECOGNITION
+    // =====================================================
+
+    function createRecognition() {
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (!SpeechRecognition) {
+
+            alert(
+                "Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge."
+            );
+
+            return null;
+
+        }
+
+
+        const recognitionInstance =
+            new SpeechRecognition();
+
+
+        recognitionInstance.continuous =
+            true;
+
+        recognitionInstance.interimResults =
+            true;
+
+        recognitionInstance.lang =
+            "en-IN";
+
+
+        recognitionInstance.onstart =
+            function () {
+
+                isListening = true;
+
+                micIndicator.classList.add(
+                    "active"
+                );
+
+                micStatus.textContent =
+                    "Listening...";
+
+                interviewerStatus.textContent =
+                    "Listening to your answer";
+
+                startAnswerBtn.disabled =
+                    true;
+
+                stopAnswerBtn.disabled =
+                    false;
+
+                startTimer();
+
+            };
+
+
+        recognitionInstance.onresult =
+            function (event) {
+
+                let interimTranscript = "";
+
+
+                for (
+                    let i = event.resultIndex;
+                    i < event.results.length;
+                    i++
+                ) {
+
+                    const transcript =
+                        event.results[i][0]
+                            .transcript;
+
+
+                    if (
+                        event.results[i].isFinal
+                    ) {
+
+                        finalTranscript +=
+                            transcript + " ";
+
+                    } else {
+
+                        interimTranscript +=
+                            transcript;
+
+                    }
+
+                }
+
+
+                liveTranscript.value =
+                    (
+                        finalTranscript +
+                        interimTranscript
+                    ).trim();
+
+            };
+
+
+        recognitionInstance.onerror =
+            function (event) {
+
+                console.error(
+                    "Speech recognition error:",
+                    event.error
+                );
+
+
+                if (
+                    event.error ===
+                    "not-allowed"
+                ) {
+
+                    alert(
+                        "Microphone permission is blocked. Please allow microphone access in your browser."
+                    );
+
+                }
+
+
+                stopListeningUI();
+
+            };
+
+
+        recognitionInstance.onend =
+            function () {
+
+                if (isListening) {
+
+                    try {
+
+                        recognitionInstance.start();
+
+                    } catch (error) {
+
+                        console.log(error);
+
+                    }
+
+                } else {
+
+                    stopListeningUI();
+
+                }
+
+            };
+
+
+        return recognitionInstance;
+
+    }
+
+
+    // =====================================================
+    // START ANSWER
+    // =====================================================
+
+    function startListening() {
+
+        window.speechSynthesis.cancel();
+
+
+        if (!recognition) {
+
+            recognition =
+                createRecognition();
+
+        }
+
+
+        if (!recognition) {
+            return;
+        }
+
+
+        finalTranscript =
+            liveTranscript.value
+                .trim();
+
+
+        if (finalTranscript) {
+
+            finalTranscript += " ";
+
+        }
+
+
+        try {
+
+            recognition.start();
+
+        } catch (error) {
+
+            console.log(
+                "Recognition already active:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // STOP ANSWER
+    // =====================================================
+
+    function stopListening() {
+
+        isListening = false;
+
+
+        if (recognition) {
+
+            try {
+
+                recognition.stop();
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+        }
+
+
+        stopListeningUI();
+
+    }
+
+
+    function stopListeningUI() {
+
+        isListening = false;
+
+
+        micIndicator.classList.remove(
+            "active"
+        );
+
+
+        micStatus.textContent =
+            "Microphone stopped";
+
+
+        interviewerStatus.textContent =
+            "Answer ready";
+
+
+        startAnswerBtn.disabled =
+            false;
+
+
+        stopAnswerBtn.disabled =
+            true;
+
+
+        stopTimer();
+
+    }
+
+
+    // =====================================================
+    // TIMER
+    // =====================================================
+
+    function startTimer() {
+
+        answerStartTime =
+            Date.now();
+
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        timerInterval =
+            setInterval(
+                updateTimer,
+                1000
+            );
+
+    }
+
+
+    function updateTimer() {
+
+        if (!answerStartTime) {
+            return;
+        }
+
+
+        const seconds =
+            Math.floor(
+                (
+                    Date.now() -
+                    answerStartTime
+                ) / 1000
+            );
+
+
+        const minutes =
+            Math.floor(
+                seconds / 60
+            );
+
+
+        const remainingSeconds =
+            seconds % 60;
+
+
+        answerTimer.textContent =
+            `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+
+    }
+
+
+    function stopTimer() {
+
+        clearInterval(
+            timerInterval
+        );
+
+    }
+
+
+    function resetTimer() {
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        timerInterval = null;
+
+        answerStartTime = null;
+
+        answerTimer.textContent =
+            "00:00";
+
+    }
+
+
+    // =====================================================
+    // SAVE ANSWER
+    // =====================================================
+
+    function saveCurrentAnswer() {
+
+        stopListening();
+
+
+        const answer =
+            liveTranscript.value.trim();
+
+
+        if (!answer) {
+
+            alert(
+                "Please give an answer before continuing."
+            );
+
+            return;
+        }
+
+
+        const item =
+            interviewQuestions[
+                currentQuestionIndex
+            ];
+
+
+        const questionId =
+            item.id ||
+            currentQuestionIndex + 1;
+
+
+        answers[
+            String(questionId)
+        ] = answer;
+
+
+        if (
+            currentQuestionIndex <
+            interviewQuestions.length - 1
+        ) {
+
+            currentQuestionIndex++;
+
+            renderQuestion();
+
+        } else {
+
+            submitInterview();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SUBMIT ALL ANSWERS
+    // =====================================================
+
+    function submitInterview() {
+
+        interviewerStatus.textContent =
+            "Evaluating interview...";
+
+
+        const hiddenAnswers =
+            document.getElementById(
+                "hiddenAnswers"
+            );
+
+
+        hiddenAnswers.innerHTML = "";
+
+
+        interviewQuestions.forEach(
+            function (
+                item,
+                index
+            ) {
+
+                const questionId =
+                    item.id ||
+                    index + 1;
+
+
+                const input =
+                    document.createElement(
+                        "input"
+                    );
+
+
+                input.type =
+                    "hidden";
+
+
+                input.name =
+                    "answer_" +
+                    questionId;
+
+
+                input.value =
+                    answers[
+                        String(
+                            questionId
+                        )
+                    ] || "";
+
+
+                hiddenAnswers.appendChild(
+                    input
+                );
+
+            }
+        );
+
+
+        document
+            .getElementById(
+                "evaluationForm"
+            )
+            .submit();
+
+    }
+
+
+    // =====================================================
+    // EVENTS
+    // =====================================================
+
+    startAnswerBtn.addEventListener(
+        "click",
+        startListening
+    );
+
+
+    stopAnswerBtn.addEventListener(
+        "click",
+        stopListening
+    );
+
+
+    submitAnswerBtn.addEventListener(
+        "click",
+        saveCurrentAnswer
+    );
+
+
+    repeatQuestionBtn.addEventListener(
+        "click",
+        function () {
+
+            const item =
+                interviewQuestions[
+                    currentQuestionIndex
+                ];
+
+
+            speakQuestion(
+                item.question
+            );
+
+        }
+    );
+
+
+    // =====================================================
+    // INITIALIZE
+    // =====================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            renderQuestion();
+
+        }
+    );
+
+
+    window.addEventListener(
+        "beforeunload",
+        function () {
+
+            window.speechSynthesis.cancel();
+
+            if (recognition) {
+
+                try {
+
+                    recognition.stop();
+
+                } catch (error) {}
+
+            }
+
+        }
+    );
+
+</script>
+
+{% endif %}
+
+{% endblock %}
