@@ -60,6 +60,7 @@ from ai import (
     generate_mock_interview,
     evaluate_mock_interview,
     build_ats_resume,
+    improve_resume,
 )
 
 
@@ -1817,6 +1818,10 @@ def dashboard():
                     "latest_target_role"
                 ] = role
 
+                session[
+                    "latest_job_description"
+                ] = job_description
+
 
         except Exception as exc:
 
@@ -1837,6 +1842,311 @@ def dashboard():
         job_description=(
             job_description
         ),
+    )
+
+
+# ============================================================
+# AUTO IMPROVE ANALYZED RESUME
+# ============================================================
+
+@app.route(
+    "/improve-resume",
+    methods=["POST"],
+)
+def improve_analyzed_resume():
+
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    report_id = request.form.get(
+        "report_id",
+        type=int,
+    )
+
+    if not report_id:
+        flash("Please analyze a Resume first.", "error")
+        return redirect(url_for("dashboard"))
+
+    db = get_db()
+
+    try:
+        report = (
+            db.query(AnalysisReport)
+            .filter(
+                AnalysisReport.id == report_id,
+                AnalysisReport.user_id == session["user_id"],
+            )
+            .first()
+        )
+
+        if not report:
+            return "Report not found.", 404
+
+        analysis_result = load_result_json(
+            report.result
+        )
+
+        resume_text = (
+            report.resume_text
+            or session.get("latest_resume_text", "")
+        )
+
+        target_role = (
+            report.target_role
+            or session.get("latest_target_role", "General")
+        )
+
+        job_description = session.get(
+            "latest_job_description",
+            "",
+        )
+
+        improved_resume = improve_resume(
+            resume_text,
+            target_role,
+            analysis_result,
+            job_description,
+        )
+
+        if not isinstance(improved_resume, dict):
+            improved_resume = {
+                "error": "AI returned an invalid improved Resume."
+            }
+
+        # Template compatibility aliases.
+        improved_resume.setdefault(
+            "ats_keywords",
+            [],
+        )
+        improved_resume.setdefault(
+            "not_added_recommendations",
+            improved_resume.get("not_added", []),
+        )
+
+        if not improved_resume.get("error"):
+            session["latest_improved_resume"] = improved_resume
+            session["latest_improved_role"] = target_role
+
+        analysis_result["report_id"] = report.id
+
+        return render_template(
+            "dashboard.html",
+            result=analysis_result,
+            role=target_role,
+            job_description=job_description,
+            improved_resume=improved_resume,
+        )
+
+    finally:
+        db.close()
+
+
+# ============================================================
+# IMPROVED RESUME PDF
+# ============================================================
+
+@app.route(
+    "/improved-resume/pdf"
+)
+def improved_resume_pdf():
+
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    improved_resume = session.get(
+        "latest_improved_resume"
+    )
+
+    if not isinstance(improved_resume, dict):
+        flash(
+            "Please generate an improved Resume first.",
+            "error",
+        )
+        return redirect(url_for("dashboard"))
+
+    buffer = BytesIO()
+
+    document = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=18 * mm,
+        leftMargin=18 * mm,
+        topMargin=15 * mm,
+        bottomMargin=15 * mm,
+    )
+
+    styles = getSampleStyleSheet()
+    story = []
+
+    headline = improved_resume.get(
+        "headline",
+        "Improved Resume",
+    )
+
+    story.append(
+        Paragraph(
+            pdf_escape(headline or "Improved Resume"),
+            styles["Title"],
+        )
+    )
+    story.append(Spacer(1, 5 * mm))
+
+    summary = improved_resume.get(
+        "professional_summary",
+        "",
+    )
+
+    if summary:
+        story.append(
+            Paragraph(
+                "Professional Summary",
+                styles["Heading2"],
+            )
+        )
+        story.append(
+            Paragraph(
+                pdf_escape(summary),
+                styles["BodyText"],
+            )
+        )
+        story.append(Spacer(1, 4 * mm))
+
+    pdf_list(
+        story,
+        "Skills",
+        improved_resume.get("skills", []),
+        styles,
+    )
+
+    experience = improved_resume.get(
+        "experience",
+        [],
+    )
+
+    if experience:
+        story.append(
+            Paragraph(
+                "Experience",
+                styles["Heading2"],
+            )
+        )
+
+        for item in experience:
+            if not isinstance(item, dict):
+                continue
+
+            heading = item.get("title", "")
+            organization = item.get(
+                "organization",
+                "",
+            )
+            date_value = item.get("date", "")
+
+            if organization:
+                heading = (
+                    f"{heading} - {organization}"
+                    if heading
+                    else organization
+                )
+
+            if date_value:
+                heading = (
+                    f"{heading} | {date_value}"
+                    if heading
+                    else date_value
+                )
+
+            if heading:
+                story.append(
+                    Paragraph(
+                        pdf_escape(heading),
+                        styles["Heading3"],
+                    )
+                )
+
+            details = item.get("details", [])
+            if isinstance(details, str):
+                details = [details]
+
+            for detail in details:
+                story.append(
+                    Paragraph(
+                        "• " + pdf_escape(detail),
+                        styles["BodyText"],
+                    )
+                )
+
+            story.append(Spacer(1, 3 * mm))
+
+    projects = improved_resume.get(
+        "projects",
+        [],
+    )
+
+    if projects:
+        story.append(
+            Paragraph(
+                "Projects",
+                styles["Heading2"],
+            )
+        )
+
+        for item in projects:
+            if not isinstance(item, dict):
+                continue
+
+            name = item.get("name", "")
+            if name:
+                story.append(
+                    Paragraph(
+                        pdf_escape(name),
+                        styles["Heading3"],
+                    )
+                )
+
+            details = item.get("details", [])
+            if isinstance(details, str):
+                details = [details]
+
+            for detail in details:
+                story.append(
+                    Paragraph(
+                        "• " + pdf_escape(detail),
+                        styles["BodyText"],
+                    )
+                )
+
+            story.append(Spacer(1, 3 * mm))
+
+    pdf_list(
+        story,
+        "Education",
+        improved_resume.get("education", []),
+        styles,
+    )
+
+    pdf_list(
+        story,
+        "Certifications",
+        improved_resume.get("certifications", []),
+        styles,
+    )
+
+    pdf_list(
+        story,
+        "Achievements",
+        improved_resume.get("achievements", []),
+        styles,
+    )
+
+    document.build(story)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="CareerMind_AI_Improved_Resume.pdf",
+        mimetype="application/pdf",
     )
 
 

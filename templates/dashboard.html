@@ -1114,6 +1114,168 @@ CareerMind AI — AI-Powered Career Intelligence Platform
 
 
         <!-- ==============================================
+             AUTO IMPROVE RESUME
+        =============================================== -->
+
+        <section class="panel">
+
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">AI Resume Optimizer</span>
+                    <h2>Auto Improve Your Resume</h2>
+                    <p>
+                        Apply the analysis to create a stronger ATS-friendly version
+                        without inventing skills, experience, achievements or metrics.
+                    </p>
+                </div>
+
+                {% if result.report_id %}
+                <form method="POST" action="{{ url_for('improve_analyzed_resume') }}">
+                    <input type="hidden" name="report_id" value="{{ result.report_id }}">
+                    <button type="submit" class="primary-btn large-btn">
+                        ✨ Auto Improve My Resume
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if improved_resume %}
+
+                {% if improved_resume.error %}
+                    <div class="alert-card error-card">
+                        <h3>Resume Improvement Failed</h3>
+                        <p>{{ improved_resume.error }}</p>
+                    </div>
+                {% else %}
+
+                    <div class="result-actions">
+                        <div>
+                            <h2>Improved Resume Preview</h2>
+                            <p>Generated only from facts supported by your original Resume.</p>
+                        </div>
+
+                        <a href="{{ url_for('improved_resume_pdf') }}" class="primary-btn">
+                            Download Improved Resume PDF
+                        </a>
+                    </div>
+
+                    {% if improved_resume.headline %}
+                    <div class="summary-box">
+                        <strong>{{ improved_resume.headline }}</strong>
+                    </div>
+                    {% endif %}
+
+                    {% if improved_resume.professional_summary %}
+                    <div class="panel">
+                        <h3>Professional Summary</h3>
+                        <p>{{ improved_resume.professional_summary }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="two-column-grid">
+                        <div class="panel">
+                            <h3>Optimized Skills</h3>
+                            <div class="tag-container">
+                                {% for item in improved_resume.skills %}
+                                    <span class="tag success-tag">{{ item }}</span>
+                                {% else %}
+                                    <p class="empty-text">No skills returned.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <h3>ATS Keywords Used</h3>
+                            <div class="tag-container">
+                                {% for item in improved_resume.ats_keywords %}
+                                    <span class="tag keyword-tag">{{ item }}</span>
+                                {% else %}
+                                    <p class="empty-text">No additional supported keywords used.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if improved_resume.experience %}
+                    <div class="panel">
+                        <h3>Experience</h3>
+                        {% for item in improved_resume.experience %}
+                            <div class="rewrite-card">
+                                <div class="rewrite-column after">
+                                    <h3>{{ item.title }}</h3>
+                                    {% if item.organization %}<p><strong>{{ item.organization }}</strong></p>{% endif %}
+                                    <ul class="result-list">
+                                        {% for detail in item.details %}<li>{{ detail }}</li>{% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if improved_resume.projects %}
+                    <div class="panel">
+                        <h3>Projects</h3>
+                        {% for item in improved_resume.projects %}
+                            <div class="rewrite-card">
+                                <div class="rewrite-column after">
+                                    <h3>{{ item.name }}</h3>
+                                    <ul class="result-list">
+                                        {% for detail in item.details %}<li>{{ detail }}</li>{% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="two-column-grid">
+                        <div class="panel">
+                            <h3>Education</h3>
+                            <ul class="result-list">
+                                {% for item in improved_resume.education %}<li>{{ item }}</li>
+                                {% else %}<li>No education returned.</li>{% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="panel">
+                            <h3>Certifications</h3>
+                            <ul class="result-list">
+                                {% for item in improved_resume.certifications %}<li>{{ item }}</li>
+                                {% else %}<li>No certifications returned.</li>{% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="two-column-grid">
+                        <div class="panel">
+                            <h3>Changes Made</h3>
+                            <ul class="result-list success-list">
+                                {% for item in improved_resume.changes_made %}<li>{{ item }}</li>
+                                {% else %}<li>No change summary returned.</li>{% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="panel">
+                            <h3>Recommended But Not Auto-Added</h3>
+                            <p class="small-muted">
+                                These items were not inserted because the original Resume
+                                did not provide enough evidence that you actually have them.
+                            </p>
+                            <ul class="result-list warning-list">
+                                {% for item in improved_resume.not_added_recommendations %}<li>{{ item }}</li>
+                                {% else %}<li>No unsupported recommendations were detected.</li>{% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                {% endif %}
+            {% endif %}
+
+        </section>
+
+
+        <!-- ==============================================
              ADVANCED TOOLS
         =============================================== -->
 
