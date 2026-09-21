@@ -1298,3 +1298,91 @@ Return ONLY valid JSON:
             "error":
                 f"Failed to build resume: {exc}"
         }
+
+# =========================================================
+# AUTO IMPROVE RESUME
+# =========================================================
+
+def improve_resume(resume_text, analysis_result, target_role, job_description=""):
+    """Improve a validated resume without inventing candidate facts."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return {"error": "GEMINI_API_KEY is not set."}
+
+    resume_text = (resume_text or "").strip()
+    if not resume_text:
+        return {"error": "Resume text is empty."}
+
+    analysis_result = analysis_result if isinstance(analysis_result, dict) else {}
+    jd = (job_description or "").strip() or "Not provided"
+
+    client = genai.Client(api_key=api_key)
+
+    prompt = f'''You are a senior ATS resume editor.
+
+Improve the candidate's resume for the target role using ONLY facts explicitly present in the ORIGINAL RESUME.
+Use the analysis only as editing guidance.
+
+TARGET ROLE:
+{target_role}
+
+JOB DESCRIPTION:
+{jd}
+
+ANALYSIS:
+{json.dumps(analysis_result, ensure_ascii=False)}
+
+ORIGINAL RESUME:
+{resume_text[:18000]}
+
+STRICT RULES:
+- Never invent skills, experience, employers, titles, dates, education, certifications, projects, achievements, responsibilities, technologies, metrics, percentages, links, or contact details.
+- Missing skills and suggested keywords must NOT be added as candidate skills unless the original resume supports them.
+- You may improve wording, ordering, clarity, action verbs, structure, and ATS readability.
+- You may use target-role/JD terminology only when supported by the original resume.
+- Unsupported recommendations must be listed separately in not_added_recommendations.
+- Preserve the candidate's original factual meaning.
+
+Return ONLY valid JSON:
+{{
+  "name": "",
+  "email": "",
+  "phone": "",
+  "linkedin": "",
+  "headline": "",
+  "professional_summary": "",
+  "skills": [],
+  "experience": [{{"title":"", "organization":"", "details":[]}}],
+  "projects": [{{"name":"", "details":[]}}],
+  "education": [],
+  "certifications": [],
+  "ats_keywords": [],
+  "changes_made": [],
+  "not_added_recommendations": []
+}}
+'''
+
+    try:
+        response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+        data = _extract_json(response.text)
+        if not isinstance(data, dict):
+            return {"error": "AI returned an invalid improved resume."}
+
+        defaults = {
+            "name": "", "email": "", "phone": "", "linkedin": "",
+            "headline": "", "professional_summary": "", "skills": [],
+            "experience": [], "projects": [], "education": [],
+            "certifications": [], "ats_keywords": [], "changes_made": [],
+            "not_added_recommendations": []
+        }
+        defaults.update(data)
+
+        for key in ("skills", "experience", "projects", "education", "certifications",
+                    "ats_keywords", "changes_made", "not_added_recommendations"):
+            if not isinstance(defaults.get(key), list):
+                defaults[key] = []
+
+        return defaults
+
+    except Exception as exc:
+        return {"error": f"Failed to improve resume: {exc}"}
